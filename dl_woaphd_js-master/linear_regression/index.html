@@ -12,23 +12,66 @@
         let v = [1, 2, 3, 4];
         let t = tf.tensor1d(v);
         // Data will be missing from t, you need to evaluate tensor to see data
-        t.print();
+        // t.print();
         t = t.add(1);
-        t.print();
-
+        // t.print();
         let v2d = [[1, 2], [3, 4]];
         // multi-dimensional tensors need a shape associated
         let t2d = tf.tensor2d(v2d, [2, 2]);
         // can use list from above and reshape 1d
         let t2dv1 = tf.tensor2d(v, [2, 2]);
-        t2d.print();
-        t2dv1.print();
-
+        // t2d.print();
+        // t2dv1.print();
         let sumV2d = t2d.add(t2dv1);
-        sumV2d.print();
+        // sumV2d.print();
+      }
+      basicExampleRun();
+
+      function dataExampleRun() {
+        const data = JSON.parse(json);
+
+        let xs = data.map(item => item[0]);
+        let ys = data.map(item => item[1]);
+
+        let features = tf.tensor2d(xs, [xs.length, 1]);
+        let targets = tf.tensor2d(ys, [ys.length, 1]);
+
+        // features.print();
+        // targets.print();
+
+        async function trainModel() {
+          // A sequential model is one in which the layers are applied in the order they are added to the model
+          let model = tf.sequential();
+
+          // units define numbers of outputs
+          // inputShape defines number of inputs
+          let layer = tf.layers.dense({ units: 1, inputShape: 1 });
+
+          model.add(layer);
+
+          //   .001 is the learning rate
+          //   let optimizer = tf.train.sgd(0.001);
+
+          //   hyperparameters are non-trainable values set to configure the network
+          model.compile({ loss: 'meanSquaredError', optimizer: 'sgd' });
+
+          //   fit the model to training data
+          await model.fit(features, targets, { epochs: 30 });
+          return model;
+        }
+
+        async function makePredictions() {
+          let model = await trainModel();
+          let four = tf.tensor1d([4]);
+          let prediction = model.predict(four);
+          //   prediction should be around 9
+          prediction.print();
+        }
+
+        makePredictions();
       }
 
-      basicExampleRun();
+      dataExampleRun();
     </script>
   </body>
 </html>
