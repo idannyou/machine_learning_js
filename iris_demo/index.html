@@ -53,10 +53,30 @@
         model.compile({ loss: 'categoricalCrossentropy', optimizer: 'adam' });
         await model.fit(train_x, train_y, { epochs: 25 });
 
-        test_x.forEach((element, index) => {
-          model.predict(tf.tensor2d(element, [1, 4])).print();
-          console.log(test_y[index]);
+        // test_x.forEach((element, index) => {
+        //   model.predict(tf.tensor2d(element, [1, 4])).print();
+        //   console.log(test_y[index]);
+        // });
+
+        const predictions = model
+          .predict(tf.tensor2d(test_x, [60, 4]))
+          .argMax([-1]);
+
+        const targets = tf.oneHot(tf.tensor1d(test_y, 'int32'), 3).argMax([-1]);
+        const metrics = await tfvis.metrics.confusionMatrix(
+          targets,
+          predictions
+        );
+        const container = document.getElementById('confusionMatrix');
+        tfvis.render.confusionMatrix(container, {
+          values: metrics,
+          tickLabels: ['setosa', 'veriscolor', 'virginica']
         });
+
+        //iris is hello world of ML
+        //MNIST is hello world of DL
+
+        // More diverse data is always better, BUT not more features, units, etc.
       }
 
       run();
